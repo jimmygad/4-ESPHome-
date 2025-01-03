@@ -1,0 +1,172 @@
+substitutions:
+  dhts_gpio: D0
+  rmtt_gpio: D6
+  rmtr_gpio: D7
+  led_gpio: D2
+  butn_gpio: D1
+  backlight_gpio: D5
+
+esphome:
+  name: ir-uge
+  friendly_name: IR UGE
+
+esp8266:
+  board: nodemcuv2
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: 
+
+ota:
+  - platform: esphome
+    password: 
+
+# Network Connection
+wifi:
+  networks:
+    - ssid: !secret wifi_ssid
+      password: !secret wifi_password
+
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Ir-Uge Fallback Hotspot"
+    password: !secret wifi_ap_password
+
+captive_portal:
+
+# Features:
+# ESP8266 Controller: Powered by the ESP8266 for reliable Wi-Fi connectivity and control.
+# IR Transmitting LEDs: Four IR LEDs driven by NPN transistors, connected to pin D6.
+# 38kHz IR Receiver Module: Receive IR signals with the IR receiver connected to pin D7.
+# USB Type-C Power: Convenient power supply through USB Type-C.
+# Programmable Headers: Easily program using any USB-to-UART module with TX, RX, RST, and GP0 pins.
+# Dual-Color Night LED Lamp: Blue/White LED lamp with a selector switch for background lighting.
+# Light Dimming: Built-in potentiometer for adjusting the brightness of the night lamp.
+# DHT11 Sensor Header: For temperature and humidity sensing, connected to pin D0.
+# User Button: Customizable button connected to pin D1.
+# User LED: Customizable LED connected to pin D2.
+# Backlight Control: Control the backlight manually or via software using pin D5.
+# IoT Platform Compatibility: Compatible with popular IoT platforms like Cayenne, Blynk, and RemoteXY.
+# Arduino IDE Support: Fully programmable using the Arduino IDE for custom algorithms.
+# Technical Specifications:
+# Controller: ESP8266 (ESP12)
+# IR Transmitting LEDs: 4 LEDs driven by NPN transistors (connected to D6)
+# IR Receiver: 38kHz IR receiver module (connected to D7)
+# Power Supply: USB Type-C
+# Programming Header: TX, RX, RST, GP0
+# Night LED Lamp: Blue/White with selector switch and dimming potentiometer (controlled via D5)
+# DHT11 Sensor Header: For temperature and humidity (connected to D0)
+# User Button: Connected to D1
+# User LED: Connected to D2
+# Dimensions: [10 cm]
+# Weight: [175 grams]
+
+
+# Time Sync
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+
+# configuration entry IR-Transmitter
+remote_transmitter:
+  - pin: $rmtt_gpio
+    id: ir_t
+    carrier_duty_percent: 50%
+
+# IR Receiver
+remote_receiver:
+  - pin:
+      number: $rmtr_gpio
+      inverted: True
+      mode:
+        input: true
+        pullup: true
+    tolerance: 55%    
+    id: ir_receiver
+
+# configuration entry IR-Climate controll Gree AC
+climate:
+  - platform: gree
+    id: study_ac
+    name: "Study AC"
+#    sensor: temperature
+    model: yan
+
+# Climate control carrier
+# Carrier MCA
+  - platform: heatpumpir
+    protocol: carrier_mca
+    id: carrier_mca
+    name: "Carrier MCA"
+    icon: mdi:air-conditioner
+    horizontal_default: middle 
+    vertical_default: middle
+    min_temperature: 16
+    max_temperature: 30
+#    sensor: temperature
+
+# carrier_nqv
+  - platform: heatpumpir
+    protocol: carrier_nqv
+    id: carrier_nqv
+    name: "Carrier NQV"
+    icon: mdi:air-conditioner
+    horizontal_default: middle 
+    vertical_default: middle
+    min_temperature: 16
+    max_temperature: 30
+#    sensor: temperature
+
+# carrier_qlima_1
+  - platform: heatpumpir
+    protocol: carrier_qlima_1
+    id: carrier_qlima_1
+    name: "Carrier qlima_1"
+    icon: mdi:air-conditioner
+    horizontal_default: middle 
+    vertical_default: middle
+    min_temperature: 16
+    max_temperature: 30
+#    sensor: temperature
+
+# carrier_qlima_2
+  - platform: heatpumpir
+    protocol: carrier_qlima_2
+    id: carrier_qlima_2
+    name: "Carrier qlima_2"
+    icon: mdi:air-conditioner
+    horizontal_default: middle 
+    vertical_default: middle
+    min_temperature: 16
+    max_temperature: 30
+#    sensor: temperature
+
+# Sensors  
+sensor:
+# hummdity and temperature sensor
+  - platform: dht
+    model: dht11
+    pin: $dhts_gpio
+    temperature:
+      filters:
+        offset: 0
+      name: "Temperature"
+      id: temperature
+      icon: mdi:thermometer
+      accuracy_decimals: 1.
+    humidity:
+      name: "Humidity"
+      id: Humidity
+      icon: mdi:water-percent
+      accuracy_decimals: 1.
+    update_interval: 60s
+
+switch:
+# Restart Switch
+  - platform: restart
+    name: "Restart"
